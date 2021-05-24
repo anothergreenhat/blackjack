@@ -5,8 +5,10 @@
 #include <chrono>
 #include <thread>
 
-// #define cout this_thread::sleep_for(chrono::milliseconds(15));cout
-//all single line cout statements must be guarded
+//slowdown terminal output to emulate realtime gameplay, modify input to chrono::milliseconds to increase/decrease delay
+//NOTE: all single line cout statements must be guarded
+#define cout this_thread::sleep_for(chrono::milliseconds(40));cout
+
 using namespace std;
 
 //generate a deck in order and commence play
@@ -17,8 +19,6 @@ void dealer_operations::start_of_play(player &me, player &com,bool e_flag)
 		but since the games repeat without returning to main, this SOP call
 		ensures that the deck is reorganized
 	*/
-	sort();
-	shuffle();
 	if(e_flag != 0) goto SKIP_SOP; // if==1, function called from EOP, skip begin prompt
 	char y;
 GET_CHAR_SOP:
@@ -32,15 +32,16 @@ SKIP_SOP:
 		end_of_play(me,com); //explicit call to end the game in case the get_state chain fails, which is get_state > deal > get_state > ...
 	}
 	else if((y == 'n') || (y == 'N'))
-		end_of_play(me,com);
+		end_of_play(me,com,1);
 	else
 		goto GET_CHAR_SOP;
 }
 
 //give readout of final hands and ask to play again
-void dealer_operations::end_of_play(player& me, player& com)
+void dealer_operations::end_of_play(player& me, player& com, bool t_flag)
 {
-	++games_played;
+    if(t_flag != 0) goto SKIP_EOP;
+    ++games_played;
 	cout <<"You have "; 
 	syntax_name(me); 
 	cout << ": " << calc(me) << '\n' << '\n' << "The dealer has "; 
@@ -48,21 +49,22 @@ void dealer_operations::end_of_play(player& me, player& com)
 	cout << ": " << calc(com) << '\n';
 	cout << '\n' << '\n';
 	cout << "You have won " << me.wins; if(me.wins==1){ cout << " time.\n"; }else {cout << " times.\n";}
-	cout << "That's a win percentage of " << (me.wins/(double)games_played)*100 << "% for "<< games_played; 
-	if(me.wins==1){cout << " game played.\n";}
+	printf("That's a win percentage of %.1f%% for %i", (me.wins/(double)games_played)*100, games_played); 
+	if(me.wins==1) {cout << " game played.\n";}
 	else {cout << " games played.\n";}
 
 	char y;
 GET_CHAR_EOP:
     cout << "The round is over... play again? [y/n]: ";
 	cin >> y;
-	if ((y=='y') || (y=='Y'))
+	if ((y == 'y') || (y == 'Y'))
 	{
 		me.destruct(); com.destruct();
 		start_of_play(me,com,1);
 	}
 	else if((y == 'n') || (y == 'N'))
 	{
+SKIP_EOP:
 		cout << "Goodbye!" << '\n';
 		exit(0);
 	}
@@ -73,15 +75,21 @@ GET_CHAR_EOP:
 //deal the initial hand
 void dealer_operations::init(player& me, player& com)
 {
+    sort();
+	shuffle();
+
 	get_card(me.hand[0]);
 	get_card(com.hand[0]);
 	get_card(me.hand[1]);
 	get_card(com.hand[1]);
+    cout << "************************START**************************" << '\n' << '\n';
 	cout << "On the dealer's side of the table, there are two cards." << '\n';
-	cout << "The first face down, and the second: ";
-	name(com.hand[1]); cout << '\n'; //display the dealer's second card
+	cout << "The first face down, and the second: "; name(com.hand[1]); cout << '\n'; //display the dealer's second card
+    cout << "From what you can see, the dealer is best valued at a score of: " << calc(com,1) << "\n\n";
+
 }
 
+//count the number of cards a player has
 int dealer_operations::count(player &guy)
 {
 	int cnt=0;
@@ -93,25 +101,27 @@ int dealer_operations::count(player &guy)
 
 void dealer_operations::get_state(player &me, player &com, bool d_flag,bool t_flag)
 {
-	if(calc(me)>21)
+    if(calc(me)>21)
 	{
-		cout << '\n' << "You bust! :("<< '\n';
+        cout << '\n' << "***********************RESULTS*************************" << '\n';
+		cout << '\n' << "You bust! :( The dealer wins by default!"<< '\n' << '\n';
 		end_of_play(me,com);
 	}
 	else if((calc(com)==21)||(calc(me)==21)) //someone has blackjack right now i know it i know it...
 	{
+        cout << '\n' << "***********************RESULTS*************************" << '\n';
 		if((calc(me)==21) && (calc(com)!=21)) //the dealer does not have blackjack but i do
 		{
-			cout << '\n' << "You have Black Jack; you win! :)" << '\n';
+			cout << '\n' << "You have Black Jack; you win! :)" << '\n' << '\n';
 			me.wins++;
 		}
 		else if(calc(me)==calc(com)) //we might both have it (but this would only happen at the beginning implicitly)
 		{
-			cout << '\n' << "It's a Black Jack Push from the beginning!" << '\n';
+			cout << '\n' << "It's a Black Jack Push from the beginning!" << '\n' << '\n';
 		}
 		else if(count(com)==2) //if my score is not the same as the dealers and one of us has blackjack, the dealer has it.
 		{
-			cout << '\n' << "The dealer was dealt Black Jack at the start :(" << '\n';
+			cout << '\n' << "The dealer was dealt Black Jack at the start :(" << '\n' << '\n';
 		}
 		end_of_play(me,com);
 	}
@@ -121,10 +131,10 @@ void dealer_operations::get_state(player &me, player &com, bool d_flag,bool t_fl
 			deal(me,com,1);
 		else
 		{
-			//These are the specific win conditions:
+            cout << '\n' << "***********************RESULTS*************************" << '\n';
 			if((calc(com)==calc(me)))
 			{
-				cout << '\n' << "It's a push!" << '\n';
+				cout << '\n' << "It's a push :/" << '\n' << '\n';
 				end_of_play(me,com);
 			}
 			else if((calc(me))>(calc(com)))
@@ -135,16 +145,17 @@ void dealer_operations::get_state(player &me, player &com, bool d_flag,bool t_fl
 			}
 			else if(calc(com)==21)
 			{
-				cout << '\n' << "The dealer has Black Jack :(" << '\n';
+				cout << '\n' << "The dealer has Black Jack :(" << '\n' << '\n';
+                end_of_play(me,com);
 			}
-			else if(calc(com)<=21)
+			else if((calc(com)<21) && ((calc(me)<calc(com)) || (calc(me)>21)))
 			{
-				cout << '\n' << "The dealer wins by default!" << '\n' << '\n';
+				cout << '\n' << "The dealer wins by default :(" << '\n' << '\n';
 				end_of_play(me,com);
 			}
 			else
 			{
-				cout << '\n' << "The dealer bust; you win! :)" << '\n';
+				cout << '\n' << "The dealer bust; you win! :)" << '\n' << '\n';
 				me.wins++;
 				end_of_play(me,com);
 			}
@@ -154,7 +165,6 @@ void dealer_operations::get_state(player &me, player &com, bool d_flag,bool t_fl
 	{
 		cout << '\n' << "Your cards are: "; syntax_name(me); cout << '\n';
 		cout << "Your cards are best valued at a score of: " << calc(me) << '\n' << '\n';
-		cout << "From what you can see, the dealer is best valued at a score of: " << calc(com,1) << "\n\n";
 		char y;
 GET_CHAR2:
 		cout << "Would you like to be hit? [y/n]: ";
@@ -173,7 +183,7 @@ void dealer_operations::deal(player &me,player &com,bool s_flag)
 	int i=count(me),j=count(com);
 	if(!s_flag) //i.e. the s_flag is CLEAR..i.e. I am hitting
 	{
-		cout << '\n' << "You are hit with ";
+		cout << "You are hit with ";
 		get_card(me.hand[i]); name(me.hand[i]);
 		cout << '\n';
 		if(calc(me)>21) //do i bust?
@@ -183,12 +193,16 @@ void dealer_operations::deal(player &me,player &com,bool s_flag)
 	}
 	else //i.e. i stay and the dealer makes its claim and the scores are produced
 	{
-		cout << '\n';
-		if(calc(com)>=17)//COM will hit IFF his score is less than 17 (i.e. here it stays and the final score is evaluated)
+		//cout << '\n';
+		if((calc(com)<21) && (calc(com)>=17))//COM will hit IFF his score is less than 17 (i.e. here it stays and the final score is evaluated)
 		{
-			cout << "The dealer stands... " << '\n' << '\n';
+			cout << "The dealer stands... " << '\n';
 			get_state(me,com,1,1);
 		}
+        else if((calc(com)>21) && (calc(com)>=17)) //the case in which COM "stands" but has actually bust
+        {
+            get_state(me,com,1,1);
+        }
 		else //the dealer hits
 		{
 			cout << "The dealer is hit with... ";
@@ -199,11 +213,12 @@ void dealer_operations::deal(player &me,player &com,bool s_flag)
 	}
 	//TODO: organize flag structure such that I pass one value and the baton passes to dealer control until bust or stay
 	//I need to ensure that when I stay, control is successfully passed to the dealer.
+    //(i.e. (?) instead of passing raw bits, flags are "automatic")
 }
 
+//calculate the value of a player's hand
 int dealer_operations::calc(player &guy,bool b_flag)
 {
-	//calculate the value of a player's hand
 	card tmp[END_DECK]; int sumH = 0, sumL= 0, i = 0;
 	copy(begin(guy.hand), end(guy.hand), begin(tmp));//copy the contents of guy.hand to tmp...from std library
 	if(b_flag==1)//i.e. I am calculating the hand of the dealer at deal time.
@@ -243,10 +258,10 @@ int dealer_operations::calc(player &guy,bool b_flag)
 void dealer_operations::get_card(card &c)
 {	
 	int i=0;
-	if(deck[END_DECK-1].p==1)
+	if(deck[END_DECK-1].p==1)//if the last card has been picked
 	{
 		cerr << " ERROR: the deck is empty, all cards have been dealt\nThis should never happen...\n\n\n";
-		exit(0); //in the meanwhile before I find a user friendly error handling solution, this is the best option.
+		exit(0); //in the meanwhile before I find a user-friendly error handling solution, this is the best option.
 	}
 	for(int i=0; i<END_DECK;++i)
 	{
@@ -261,6 +276,7 @@ void dealer_operations::get_card(card &c)
 	}
 }
 
+//sort the global deck
 void dealer_operations::sort()
 {
 	card j;
@@ -278,13 +294,15 @@ void dealer_operations::sort()
 	}
 }
 
+//shuffle the global deck using a standard swap
 void dealer_operations::shuffle()
 {
 	random_device rd;  //Will be used to obtain a seed for the random number engine
 	mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 	uniform_int_distribution<> dis1(0,(END_DECK-1)); //i.e. a deck of 52 cards
-	int i,n = END_DECK;
-	while(n > 1) {
+	int i,n = END_DECK; //start at location 52
+	while(n > 1) 
+    {
 		i = dis1(gen);  --n;  
 		swap(deck[i],deck[n]);
 	}

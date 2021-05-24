@@ -5,9 +5,9 @@
 class dealer_operations
 {
 public:
-	void get_state(player&, player&,bool d_flag=false,bool=false);//SET for dealer control, CLEAR for a continue; SET=play is terminated
+	void get_state(player&, player&,bool d_flag=false,bool t_flag=false);//SET for dealer control, CLEAR for a continue; SET=play is terminated
 	void init(player&, player&);
-	void end_of_play(player&, player&);
+	void end_of_play(player&, player&, bool t_flag=false); //SET play terminates without info display;
 	void start_of_play(player&,player&,bool e_flag=false);//SET to indicate called from EOP, ie no need for cin prompt, CLEAR for prompt
 	dealer_operations():games_played(0){};
 	~dealer_operations()
@@ -27,7 +27,7 @@ protected:
 private:
 	card deck[END_DECK];
 	int games_played;
-	struct flag
+	struct flag //unused?? supposed "flag structure" to better organize flags, but why is this needed?
 	{ 
 		enum val
 		{

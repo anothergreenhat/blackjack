@@ -31,7 +31,7 @@ public:
 			hand[i].val = 0; hand[i].suit=0; hand[i].p=0;
 		}
 	} 
-	player() :wins(0) {};
+	player():wins(0) {};
 private:
 	card hand[END_DECK];
 	int wins;
