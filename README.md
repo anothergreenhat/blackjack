@@ -1,5 +1,5 @@
 # blackjack
-a cli blackjack game :)
+A CLI Blackjack game :)
 
 # Install
 Run the provided executable on Linux from the Terminal with ./blackjack
