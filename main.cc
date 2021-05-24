@@ -1,7 +1,7 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
  * main.cc
- * Copyright (C) 2020 Joseph Madera <>
+ * Copyright (C) 2021 Joseph Madera <>
  * 
  * blackjack is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
