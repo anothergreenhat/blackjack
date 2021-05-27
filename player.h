@@ -11,7 +11,7 @@ struct card
 	{
 		return *this;
 	}
-	card() //cpp constructor
+	card() //cpp struct constructor
 	{
 		val=0;
 		suit=0;
