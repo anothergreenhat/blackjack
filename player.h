@@ -6,12 +6,12 @@ struct card
 {
 	int val;
 	int suit;
-	bool p; //picked/played
+	bool p; // has this card been picked or played?
 	card operator=(card *c)
 	{
 		return *this;
 	}
-	card()
+	card() //cpp constructor
 	{
 		val=0;
 		suit=0;
@@ -23,10 +23,9 @@ class player
 {
 friend class dealer_operations;
 public:
-	//a callable "destructor"
-	void destruct()
+	void destruct() //a callable "destructor"
 	{ 
-		for(int i = 0; i < END_DECK; ++i)
+		for(int i = 0; i < END_DECK; ++i) // restore all cards in this player's hand to 0
 		{
 			hand[i].val = 0; hand[i].suit=0; hand[i].p=0;
 		}

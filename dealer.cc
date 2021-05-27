@@ -34,7 +34,11 @@ SKIP_SOP:
 	else if((y == 'n') || (y == 'N'))
 		end_of_play(me,com,1);
 	else
-		goto GET_CHAR_SOP;
+    {
+        cin.ignore(numeric_limits<streamsize>::max(),'\n'); //if anything other than y/Y n/N is entered, input is ignored. 
+                                                            //this solved the GOTO problem of looping for every input character
+		goto GET_CHAR_SOP;    
+    }
 }
 
 //give readout of final hands and ask to play again
@@ -69,7 +73,10 @@ SKIP_EOP:
 		exit(0);
 	}
 	else
-		goto GET_CHAR_EOP;
+    {
+        cin.ignore(numeric_limits<streamsize>::max(),'\n');
+        goto GET_CHAR_EOP;
+    }
 }
 
 //deal the initial hand
@@ -174,7 +181,10 @@ GET_CHAR2:
 		else if((y=='n') || (y=='N'))
 			deal(me,com,1);//i.e. I stand and now the dealer plays..
 		else
-			goto GET_CHAR2;
+        {
+            cin.ignore(numeric_limits<streamsize>::max(),'\n');
+            goto GET_CHAR2;
+        }
 	}
 }
 
@@ -211,24 +221,22 @@ void dealer_operations::deal(player &me,player &com,bool s_flag)
 		}
 		get_state(me,com,1);//stay and return the win condition result
 	}
-	//TODO: organize flag structure such that I pass one value and the baton passes to dealer control until bust or stay
-	//I need to ensure that when I stay, control is successfully passed to the dealer.
-    //(i.e. (?) instead of passing raw bits, flags are "automatic")
 }
 
 //calculate the value of a player's hand
 int dealer_operations::calc(player &guy,bool b_flag)
 {
-	card tmp[END_DECK]; int sumH = 0, sumL= 0, i = 0;
+	card tmp[END_DECK]; 
+    int sumH = 0, sumL= 0, i = 0;
 	copy(begin(guy.hand), end(guy.hand), begin(tmp));//copy the contents of guy.hand to tmp...from std library
-	if(b_flag==1)//i.e. I am calculating the hand of the dealer at deal time.
+	if(b_flag==1)//i.e. I'm telling the player the value of the single face up card
 	{
 		if((tmp[1].val==13)||(tmp[1].val==12)||(tmp[1].val==11))
 			tmp[1].val=10; //if first card is face, set to 10
 		if(tmp[1].val==1)
-			tmp[1].val=11; //if first card is ace, set high if it benefits the player
-		sumH=tmp[1].val; //the starting sum is now the value of this evaluation
-		return sumH; //using ace_val high;
+			tmp[1].val=11; //if first card is ace, set high (11) always in this case
+		sumH=tmp[1].val;
+		return sumH;
 	}
 	while(tmp[i].val!=0) //while there are cards in the player's hand
 	{
@@ -240,10 +248,9 @@ int dealer_operations::calc(player &guy,bool b_flag)
 				tmp[i].val=11;
 			else if(sumH<10)
 			{
-				sumH+=tmp[i].val=11;  sumL+=tmp[i].val=1;
+				sumH+=tmp[i].val=11;  sumL+=tmp[i].val=1; //save both situations for comparison of bust later
 				++i; continue;
 			}
-
 		}
 		sumH+=tmp[i].val;
 		sumL+=tmp[i].val;
@@ -261,7 +268,7 @@ void dealer_operations::get_card(card &c)
 	if(deck[END_DECK-1].p==1)//if the last card has been picked
 	{
 		cerr << " ERROR: the deck is empty, all cards have been dealt\nThis should never happen...\n\n\n";
-		exit(0); //in the meanwhile before I find a user-friendly error handling solution, this is the best option.
+		exit(1); //in the meanwhile before I find a user-friendly error handling solution, this is the best option.
 	}
 	for(int i=0; i<END_DECK;++i)
 	{
@@ -303,7 +310,7 @@ void dealer_operations::shuffle()
 	int i,n = END_DECK; //start at location 52
 	while(n > 1) 
     {
-		i = dis1(gen);  --n;  
+		i = dis1(gen); --n;  
 		swap(deck[i],deck[n]);
 	}
 }

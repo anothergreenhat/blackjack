@@ -27,13 +27,6 @@ protected:
 private:
 	card deck[END_DECK];
 	int games_played;
-	struct flag //unused?? supposed "flag structure" to better organize flags, but why is this needed?
-	{ 
-		enum val
-		{
-			b=0x01,s=0x02,d=0x04,t=0x08,e=0x10 
-		}; 
-	};
 };
 
 #endif // _DEALER_H_
