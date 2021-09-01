@@ -7,7 +7,8 @@
 
 //slowdown terminal output to emulate realtime gameplay, modify input to chrono::milliseconds to increase/decrease delay
 //NOTE: all single line cout statements must be guarded
-#define cout this_thread::sleep_for(chrono::milliseconds(40));cout
+
+// #define cout this_thread::sleep_for(chrono::milliseconds(40));cout
 
 using namespace std;
 
@@ -288,7 +289,6 @@ void dealer_operations::sort()
 {
 	card j;
 	j.suit=1; j.val=1;
-	cout << '\n';
 	for(int i=0; i<END_DECK; i++)
 	{
 		deck[i]=j;
@@ -299,6 +299,7 @@ void dealer_operations::sort()
 			j.val=1;
 		}
 	}
+	cout << '\n';
 }
 
 //shuffle the global deck using a standard swap
