@@ -2,8 +2,8 @@
 #include "dealer.h"
 #include <iostream>
 #include <random>
-#include <chrono>
-#include <thread>
+//#include <chrono>
+//#include <thread>
 
 //slowdown terminal output to emulate realtime gameplay, modify input to chrono::milliseconds to increase/decrease delay
 //NOTE: all single line cout statements must be guarded
