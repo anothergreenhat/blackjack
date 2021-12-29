@@ -5,7 +5,7 @@
 //#include <chrono>
 //#include <thread>
 
-//slowdown terminal output to emulate realtime gameplay, modify input to chrono::milliseconds to increase/decrease delay
+//slowdown terminal output to emulate realtime gameplay, modify input to chrono::milliseconds() to increase/decrease delay
 //NOTE: all single line cout statements must be guarded
 
 // #define cout this_thread::sleep_for(chrono::milliseconds(40));cout

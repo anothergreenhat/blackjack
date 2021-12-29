@@ -30,4 +30,3 @@ int main()
     dealer.start_of_play(me,com);
 	return 0;
 }
-
